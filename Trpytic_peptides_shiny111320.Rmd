@@ -1,0 +1,119 @@
+---
+title: "tryptic_peptides_rmd100420"
+author: "WL"
+date: "2020/10/4"
+output: ioslides_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## protein sequence and KR location
+```{r}
+proseq<- c("MKWVTFISLL FLFSSAYSRG VFRRDAHKSE VAHRFKDLGE ENFKALVLIA ")
+print(proseq)
+
+msclvg<-0
+AAct<-1
+KRct<-0
+KRseq<-c()
+
+for (i in 1:nchar(proseq)){
+  AA<- substr(proseq,i,i)
+  if (AA%in%"K"||AA%in%"R")
+  {
+    KRct<-KRct+1
+    KRseq[AAct]<-i
+    AAct<-AAct+1
+    msclvg<-msclvg+1
+  }
+}
+print(paste(c("Total number of K and R is"),KRct),collapse="")
+print("K and R locate at:")
+print(KRseq)
+```
+
+## Theoretical peptides
+
+```{r theoretical peptides, echo = FALSE}
+msclvg<-7
+m<-1
+peplist<-list()
+peplistN<-list()
+peplistC<-list()
+for (n in KRseq[]){
+  peplistN[m]<-substr(proseq,1,n)
+  peplistC[m]<-substr(proseq,n+1,nchar(proseq))
+  m<-m+1
+  if (m>msclvg){break}
+}
+peplist<-c(peplistN,peplistC)
+peplist<-peplist[order(sapply(peplist,nchar),decreasing = T)]
+print(peplist)
+```
+
+## peptides mass
+
+```{r peptides mass}
+for (a in 1:length(peplist)){
+  pepmass<-0
+  for (b in 1:nchar(peplist[a])){
+    AA<- substr(peplist[a],b,b)
+    if (AA%in%"A") {pepmass<-pepmass+71.0788;next}
+    if (AA%in%"R") {pepmass<-pepmass+156.1875;next}
+    if (AA%in%"N") {pepmass<-pepmass+114.1038;next}
+    if (AA%in%"D") {pepmass<-pepmass+115.0886;next}
+    if (AA%in%"C") {pepmass<-pepmass+103.1388;next}
+    if (AA%in%"E") {pepmass<-pepmass+129.1155;next}
+    if (AA%in%"Q") {pepmass<-pepmass+128.1307;next}
+    if (AA%in%"G") {pepmass<-pepmass+57.0519;next}
+    if (AA%in%"H") {pepmass<-pepmass+137.1411;next}
+    if (AA%in%"I") {pepmass<-pepmass+113.1594;next}
+    if (AA%in%"L") {pepmass<-pepmass+113.1594;next}
+    if (AA%in%"K") {pepmass<-pepmass+128.1741;next}
+    if (AA%in%"M") {pepmass<-pepmass+131.1926;next}
+    if (AA%in%"F") {pepmass<-pepmass+147.1766;next}
+    if (AA%in%"P") {pepmass<-pepmass+97.1167;next}
+    if (AA%in%"S") {pepmass<-pepmass+87.0782;next}
+    if (AA%in%"T") {pepmass<-pepmass+101.1051;next}
+    if (AA%in%"W") {pepmass<-pepmass+186.2132;next}
+    if (AA%in%"Y") {pepmass<-pepmass+163.1760;next}
+    if (AA%in%"V") {pepmass<-pepmass+99.1326;next}
+  }
+  print(paste(peplist[a], " ", pepmass))
+}
+```
+
+## Tryptic peptide list
+
+```{r shinyApp}
+library(shiny)
+ui <- fluidPage(
+   textInput(inputId = "proseq", label = h3("Protein sequence"),value = "Enter sequence here..."),
+   hr(),
+   fluidRow(column(12, verbatimTextOutput("value"))),
+   textOutput("proseq"),
+   textOutput("peplist")
+) 
+
+
+server <- function(input,output){
+  output$proseq<- renderText({input$proseq})
+  output$peplist<-renderPrint({for (i in 1:nchar(input$proseq)){
+     AA<-substr(input$proseq,i,i)
+        if (AA%in%"K"||AA%in%"R"||AA%in%"r"||AA%in%"k")
+           {
+           peplistN<-substr(input$proseq,1,i)
+           print(peplistN)
+           peplistC<-substr(input$proseq,i+1,nchar(input$proseq))
+           print(peplistC)
+        }
+          }
+     
+    })
+}
+shinyApp(ui=ui,server=server)
+
+```
